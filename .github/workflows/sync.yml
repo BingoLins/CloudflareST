@@ -14,6 +14,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: true
+          fetch-depth: 0 # 完整拉取你自己的历史
 
       - name: Sync and Force Push from Upstream
         run: |
@@ -21,14 +22,18 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           
-          # 2. 添加 XIU2 的原作者仓库作为远程源
-          git remote add upstream https://github.com/XIU2/CloudflareSpeedTest.git
+          # 2. 直接用最简单直接的方式克隆 XIU2 的最新代码到本地临时文件夹
+          git clone --depth=1 https://github.com/XIU2/CloudflareSpeedTest.git temp_upstream
           
-          # 3. 拉取原作者最新的所有数据
-          git fetch upstream --tags
+          # 3. 把临时文件夹里的所有核心代码文件强制覆盖到你当前的目录
+          # (排除掉你自己的 .github 自动化文件夹，防止你的自动化脚本被覆盖删除)
+          rsync -av --exclude='.github' --exclude='.git' temp_upstream/ ./
           
-          # 4. 把原作者的主分支（master）强行覆盖到你自己的主分支（master）
-          # 如果你的默认分支叫 main，请把下面的 master:master 改为 master:main
-          git push upstream refs/remotes/upstream/master:refs/heads/main --force
-
+          # 4. 清理临时文件夹
+          rm -rf temp_upstream
           
+          # 5. 提交并强行推送更新到你的 main 分支
+          git add -A
+          # 检查是否有内容更新，有更新才提交，防止没更新时报错
+          git diff-index --quiet HEAD || git commit -m "Synchronized with XIU2 Upstream Release"
+          git push origin main --force
