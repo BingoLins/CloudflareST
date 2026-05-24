@@ -29,6 +29,6 @@ jobs:
           
           # 4. 把原作者的主分支（master）强行覆盖到你自己的主分支（master）
           # 如果你的默认分支叫 main，请把下面的 master:master 改为 master:main
-          git push upstream refs/remotes/upstream/master:refs/heads/master --force
+          git push upstream refs/remotes/upstream/master:refs/heads/main --force
 
           
