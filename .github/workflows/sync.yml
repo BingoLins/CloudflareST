@@ -1,0 +1,24 @@
+name: Event-Driven Sync Upstream
+
+on:
+  # 允许来自 Pipedream 的外部 Webhook 信号触发
+  repository_dispatch:
+    types: [rss_release_update]
+  # 同时也保留网页端手动点击触发的能力，方便测试
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+
+      - name: Sync Upstream
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
+        with:
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          upstream_repository: XIU2/CloudflareSpeedTest
+          upstream_branch: master
+          target_branch: main
+          test_mode: false
